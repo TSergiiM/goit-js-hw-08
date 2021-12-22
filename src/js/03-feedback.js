@@ -1,46 +1,48 @@
 import throttle from 'lodash.throttle';
-// refs = {
-//   form: document.querySelector('form'),
-// };
-// refs.form.addEventListener('input', event => {
-//   console.log(event);
-// });
-let formData = {};
+
 const LOCALSTORAGE_KEY = 'feedback-form-state';
-try {
-  JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY));
-} catch (error) {
-  console.log(error.name);
-  console.log(error.message);
-}
-const userInput = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY));
 const refs = {
   form: document.querySelector('form'),
-  input: document.querySelector('input'),
-  textarea: document.querySelector('textarea'),
 };
 
-function fillingFormFields() {
-  if (userInput) {
-    refs.input.value = userInput.email || '';
-    refs.textarea.value = userInput.message || '';
-    formData.email = refs.input.value;
-    formData.message = refs.textarea.value;
+refs.form.addEventListener('submit', onSubmit);
+refs.form.addEventListener('input', throttle(onFormInput, 500));
+// функція записує інпути юзера в локальне сховище
+function onFormInput() {
+  const {
+    elements: { email, message },
+  } = refs.form;
+  const options = {
+    email: email.value,
+    message: message.value.trim(),
+  };
+  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(options));
+}
+// функція заповнює інпути даними з локального сховища
+function loadDataLocaleStorage() {
+  const saved = localStorage.getItem(LOCALSTORAGE_KEY);
+  if (saved !== null) {
+    try {
+      refs.form.email.value = JSON.parse(saved).email;
+      refs.form.message.value = JSON.parse(saved).message;
+    } catch (error) {
+      console.log(error.name);
+      console.log(error.message);
+    }
   }
 }
+loadDataLocaleStorage();
 
-function onFormSubmit(event) {
+// функція перевіряє поля на заповненість
+// та очищає інпути та локальне сховище після садміту
+function onSubmit(event) {
+  const options = {
+    email: event.currentTarget.elements.email.value,
+    message: event.currentTarget.elements.message.value.trim(),
+  };
   event.preventDefault();
-  refs.form.reset();
+  if (!options.email || !options.message) return alert('всі поля повинні бути заповнені');
+  console.log(options);
+  event.currentTarget.reset();
   localStorage.clear();
-  console.log(formData);
-  formData = {};
 }
-
-function onFormInput(event) {
-  formData[event.target.name] = event.target.value;
-  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(formData));
-}
-fillingFormFields();
-refs.form.addEventListener('submit', onFormSubmit);
-refs.form.addEventListener('input', throttle(onFormInput, 500));
