@@ -42,6 +42,11 @@ function onSubmit(event) {
   };
   event.preventDefault();
   if (!options.email || !options.message) return alert('всі поля повинні бути заповнені');
+
+  //варіант без алерта просто
+  // if (options.email === '' || options.message === '') {
+  //   return;
+  // }
   console.log(options);
   event.currentTarget.reset();
   localStorage.clear();
