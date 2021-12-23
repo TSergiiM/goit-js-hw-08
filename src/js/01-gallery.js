@@ -27,4 +27,3 @@ new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionDelay: 250,
 });
-refs.gallery.addEventListener('click', onGalleryClick);
